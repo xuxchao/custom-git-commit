@@ -1,9 +1,9 @@
-// import typescript from "rollup-plugin-typescript2";
+import typescript from "rollup-plugin-typescript2";
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import terser from "@rollup/plugin-terser";
 import json from "@rollup/plugin-json";
-import { babel } from "@rollup/plugin-babel";
+// import { babel } from "@rollup/plugin-babel";
 
 /** @type {import('rollup').Config} */
 export default {
@@ -20,10 +20,10 @@ export default {
   plugins: [
     resolve(), // 解析 Node.js 模块依赖
     commonjs(), // 将 CommonJS 模块转为 ES6+ 模块
-    // typescript(), // 编译 TypeScript
+    typescript(), // 编译 TypeScript
     terser(),
     json(),
-    babel({ babelHelpers: "bundled", extensions: ["ts", "js"] }),
+    // babel({ babelHelpers: "bundled", extensions: ["ts", "js"] }),
   ],
-  external: ["inquirer"],
+  external: ["inquirer", "execa", "chalk"],
 };
