@@ -1,7 +1,7 @@
 import inquirer from "inquirer";
 
-inquirer
-  .prompt([
+async function main() {
+  const result = await inquirer.prompt([
     {
       type: "list",
       name: "theme",
@@ -27,7 +27,8 @@ inquirer
         return val.toLowerCase();
       },
     },
-  ])
-  .then((answers) => {
-    console.log(JSON.stringify(answers, null, "  "));
-  });
+  ]);
+  console.log(result);
+}
+
+main();

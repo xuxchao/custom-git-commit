@@ -2,14 +2,30 @@
   "name": "custom-git-commit",
   "module": "index.ts",
   "type": "module",
+  "bin": {
+    "commit": "./bin/index.js"
+  },
+  "files": [
+    "bin"
+  ],
+  "scripts": {
+    "watch": "rollup -c rollup.config.js -w"
+  },
   "devDependencies": {
+    "@rollup/plugin-babel": "^6.0.3",
+    "@rollup/plugin-commonjs": "^25.0.0",
+    "@rollup/plugin-json": "^6.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.2",
+    "@rollup/plugin-terser": "^0.4.3",
+    "@types/inquirer": "^9.0.3",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
-    "bun-types": "latest",
+    "commitizen": "^4.3.0",
     "eslint": "^8.45.0",
     "prettier": "^3.0.0",
-    "typescript": "^5.0.4",
-    "@types/inquirer": "^9.0.3"
+    "rollup": "^3.25.1",
+    "rollup-plugin-typescript2": "^0.34.1",
+    "typescript": "^5.0.4"
   },
   "dependencies": {
     "inquirer": "^9.2.8"
