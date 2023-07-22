@@ -1,48 +1,65 @@
-import inquirer from "inquirer";
-import { execa } from "execa";
-import chalk from "chalk";
+import { $ } from "execa";
+import { consola } from "consola";
+import { program } from "commander";
+import targetPack from "./package.json";
+import { loadConfig } from "unconfig";
+import { Config } from "./types";
 
-const { stdout } = await execa("git", ["status", "-s"]);
-const commitNumber = stdout.split("\n").length;
-if (commitNumber === 0) {
-  console.log(chalk.red("当前没有需要提交的文件"));
-  process.exit(0);
-}
-const result = await inquirer.prompt<{
-  gitType: string;
-  message: string;
-}>([
-  {
-    type: "list",
-    name: "gitType",
-    message: `当前有${commitNumber}个文件需要提交。` + "请选择一个提交类型:",
-    choices: [
+const regShellKey = /--([a-zA-Z]*)/;
+
+async function main() {
+  const {
+    config: { command: commandItemShells },
+  } = await loadConfig<Config>({
+    sources: [
       {
-        name: "feat:      一个新的功能",
-        value: "feat",
-      },
-      {
-        name: "fix:       修复了一个bug",
-        value: "fix",
-      },
-      {
-        name: "docs:      只有文档改变了",
-        value: "docs",
-      },
-      {
-        name: "style:     只改变了样式",
-        value: "style",
-      },
-      {
-        name: "test:      添加了测试用例",
-        value: "test",
+        files: "custom.config",
       },
     ],
-  },
-  {
-    type: "input",
-    name: "message",
-    message: "请输入提交信息:",
-  },
-]);
-console.log(result);
+    merge: false,
+  });
+
+  const shellMap = new Map<string, string | string[]>();
+  const command = program
+    .name(targetPack.name)
+    .description("通过用户的配置快速执行命令");
+  commandItemShells.forEach((shell) => {
+    const key = shell.flags.match(regShellKey);
+    if (key === null) {
+      return consola.error(`命令:${shell.flags}书写错误`);
+    }
+    shellMap.set(key[1], shell.shells);
+    command.option(shell.flags, shell.desc);
+  });
+  command
+    .version(targetPack.version, "-v, --version", "当前项目的版本")
+    .parse(process.argv);
+
+  const params = program.opts<Record<string, boolean>>();
+  const paramsKeys = Object.keys(params);
+  for (const key of paramsKeys) {
+    let shells = shellMap.get(key);
+    if (!shells) return;
+    if (!Array.isArray(shells)) {
+      shells = [shells];
+    }
+    // const script = `
+    //   #!/bin/bash
+    //   ${shells.join("&&")}
+    // `;
+    // await $({ stdio: "inherit" })`bash -c ${script}`;
+    // consola.success(`命令: ${shells.join("&&")} 执行成功`);
+
+    for (const shell of shells) {
+      const script = `
+        #!/bin/bash
+        ${shell}
+      `;
+      await $({ stdio: "inherit" })`bash -c ${script}`;
+      consola.success(`命令: ${shell} 执行成功`);
+    }
+  }
+  process.exit();
+}
+
+main();
